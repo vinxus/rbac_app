@@ -1,0 +1,14 @@
+<h1>RBAC System - User <%= @user['name'] %> page</h1>
+<p>This is the User Home page</p>
+<div class='content'>
+    <ul>
+    <% @userData.each do |data| %>
+        <li>
+            <%= data['info'] %>
+        </li>
+    <% end %>    
+        <li>
+            Some bit of information
+        </li>
+    </ul>
+</div>
