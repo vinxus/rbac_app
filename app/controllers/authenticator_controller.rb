@@ -18,11 +18,8 @@ class AuthenticatorController < ApplicationController
         private
         def token
             token = JWT.encode params, nil, false
-            # puts token
         end    
         def payload
-            # puts params
             payload = JWT.decode params[:token], nil, false
-            # puts payload
         end
 end

@@ -4,7 +4,7 @@ $(function() {
     let $loginTemplate = $('#loginForm')     
     $loginTemplate.removeClass('hidden');
     $loginTemplate.css({display: 'block'});
-
+    $('#userName').focus();
     let dialogData = {
         title: 'Welcome To RBAC System',
         width: 400,
@@ -16,28 +16,27 @@ $(function() {
     let buttons = [{ 
         text: 'Login',
         click: () => {
-
+            if ($('#userName').val() == '') {
+                $('#userName').focus();
+                return false     
+            }    
+            if ($('#password').val() == '') {
+                $('#password').focus();
+                return false     
+            }   
             activeLogin().then((res) => {
 
                 if (! res) {
+                    
+                    if (doLogin()) {
 
-                    // let result = doLogin();
-                    console.log('Not logged in!')
-                    let result = doLogin()
-                    console.log(result)
-                    if (result) {
-                        console.log('Logged in successful!')
-                        window.localStorage.setItem('activeSession', result.token)
                         redirectPage();
                         //$dialog.dialog('destroy');
 
                     } else {
                         alert('Login Failed!')
                     }
-                } else {
-                    console.log(res)
-                    // redirectPage();
-                }
+                } 
             })
             
         }
@@ -46,7 +45,10 @@ $(function() {
 
     let doLogin = async () => {
     
-        let result = await ajaxCaller({user: $('#userName').val(),  }, 'POST', '/login/authenticate')
+        let result = await ajaxCaller(
+            {username: $('#userName').val(),  password: $('#password').val(),}, 
+            'POST', '/authenticate'
+            )
             .then((r) => {
 
                 window.localStorage.setItem('activeSession', r.token)
@@ -65,7 +67,7 @@ $(function() {
         let landingUrl = (page == null) ? window.localStorage.getItem('lastPage') : page;
         console.log(landingUrl);
         if (landingUrl == null) {
-            landingUrl = '/welcome/index'
+            landingUrl = window.location.host + '/home/index'
 
         } 
         console.log(landingUrl );
@@ -75,7 +77,7 @@ $(function() {
     }      
 
     let decodeToken = function(data) {
-        console.log(['DecodeToken', data])
+
         $.ajax({
                 url: '/authenticator/ajax_decode_token',
                 method: 'get',
@@ -89,7 +91,7 @@ $(function() {
 
     let activeLogin = async () => {
         let activeSession = window.localStorage.getItem('activeSession');
-
+        console.log(activeSession)
         if (activeSession) {
             let response = await ajaxCaller(
                 {token: activeSession}, 
@@ -100,8 +102,7 @@ $(function() {
                 console.log(response.expireAt)
                 const dateNow = new Date()
                 const expireAt = new Date(response.expireAt)
-                console.log(expireAt)
-                console.log(dateNow)
+
                 if (expireAt > dateNow) {
                     console.log('Session is current')
                     return true
